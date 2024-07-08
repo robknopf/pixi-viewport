@@ -19,8 +19,7 @@ import type { Viewport } from '../Viewport';
  *    the world is stuck to the appropriate boundaries
  *
  */
-export interface IClampOptions
-{
+export interface IClampOptions {
     /**
     * Clamp left; true = 0
     *
@@ -78,8 +77,7 @@ const DEFAULT_CLAMP_OPTIONS: Required<IClampOptions> = {
  *
  * @public
  */
-export class Clamp extends Plugin
-{
+export class Clamp extends Plugin {
     /** Options used to initialize this plugin, cannot be modified later. */
     public readonly options: Required<IClampOptions>;
 
@@ -98,13 +96,11 @@ export class Clamp extends Plugin
     /**
      * This is called by {@link Viewport.clamp}.
      */
-    constructor(parent: Viewport, options : IClampOptions = {})
-    {
+    constructor(parent: Viewport, options: IClampOptions = {}) {
         super(parent);
         this.options = Object.assign({}, DEFAULT_CLAMP_OPTIONS, options);
 
-        if (this.options.direction)
-        {
+        if (this.options.direction) {
             this.options.left = this.options.direction === 'x' || this.options.direction === 'all' ? true : null;
             this.options.right = this.options.direction === 'x' || this.options.direction === 'all' ? true : null;
             this.options.top = this.options.direction === 'y' || this.options.direction === 'all' ? true : null;
@@ -116,21 +112,17 @@ export class Clamp extends Plugin
         this.update();
     }
 
-    private parseUnderflow()
-    {
+    private parseUnderflow() {
         const clamp = this.options.underflow.toLowerCase();
 
-        if (clamp === 'none')
-        {
+        if (clamp === 'none') {
             this.noUnderflow = true;
         }
-        else if (clamp === 'center')
-        {
+        else if (clamp === 'center') {
             this.underflowX = this.underflowY = 0;
             this.noUnderflow = false;
         }
-        else
-        {
+        else {
             // eslint-disable-next-line no-nested-ternary
             this.underflowX = (clamp.indexOf('left') !== -1) ? -1 : (clamp.indexOf('right') !== -1) ? 1 : 0;
             // eslint-disable-next-line no-nested-ternary
@@ -139,17 +131,14 @@ export class Clamp extends Plugin
         }
     }
 
-    public move(): boolean
-    {
+    public move(): boolean {
         this.update();
 
         return false;
     }
 
-    public update(): void
-    {
-        if (this.paused)
-        {
+    public update(): void {
+        if (this.paused) {
             return;
         }
 
@@ -157,59 +146,47 @@ export class Clamp extends Plugin
         if (this.parent.x === this.last.x
             && this.parent.y === this.last.y
             && this.parent.scale.x === this.last.scaleX
-            && this.parent.scale.y === this.last.scaleY)
-        {
+            && this.parent.scale.y === this.last.scaleY) {
             return;
         }
         const original = new Point(this.parent.x, this.parent.y);
         // TODO: Fix
         const decelerate: any = (this.parent.plugins as any).decelerate || {};
 
-        if (this.options.left !== null || this.options.right !== null)
-        {
+        if (this.options.left !== null || this.options.right !== null) {
             let moved = false;
 
-            if (!this.noUnderflow && this.parent.screenWorldWidth < this.parent.screenWidth)
-            {
-                switch (this.underflowX)
-                {
+            if (!this.noUnderflow && this.parent.screenWorldWidth < this.parent.screenWidth) {
+                switch (this.underflowX) {
                     case -1:
-                        if (this.parent.x !== 0)
-                        {
+                        if (this.parent.x !== 0) {
                             this.parent.x = 0;
                             moved = true;
                         }
                         break;
                     case 1:
-                        if (this.parent.x !== this.parent.screenWidth - this.parent.screenWorldWidth)
-                        {
+                        if (this.parent.x !== this.parent.screenWidth - this.parent.screenWorldWidth) {
                             this.parent.x = this.parent.screenWidth - this.parent.screenWorldWidth;
                             moved = true;
                         }
                         break;
                     default:
-                        if (this.parent.x !== (this.parent.screenWidth - this.parent.screenWorldWidth) / 2)
-                        {
+                        if (this.parent.x !== (this.parent.screenWidth - this.parent.screenWorldWidth) / 2) {
                             this.parent.x = (this.parent.screenWidth - this.parent.screenWorldWidth) / 2;
                             moved = true;
                         }
                 }
             }
-            else
-            {
-                if (this.options.left !== null)
-                {
-                    if (this.parent.left < (this.options.left === true ? 0 : this.options.left))
-                    {
+            else {
+                if (this.options.left !== null) {
+                    if (this.parent.left < (this.options.left === true ? 0 : this.options.left as number)) {
                         this.parent.x = -(this.options.left === true ? 0 : this.options.left) * this.parent.scale.x;
                         decelerate.x = 0;
                         moved = true;
                     }
                 }
-                if (this.options.right !== null)
-                {
-                    if (this.parent.right > (this.options.right === true ? this.parent.worldWidth : this.options.right))
-                    {
+                if (this.options.right !== null) {
+                    if (this.parent.right > (this.options.right === true ? this.parent.worldWidth : this.options.right as number)) {
                         this.parent.x = (-(this.options.right === true ? this.parent.worldWidth : this.options.right)
                             * this.parent.scale.x) + this.parent.screenWidth;
                         decelerate.x = 0;
@@ -217,57 +194,45 @@ export class Clamp extends Plugin
                     }
                 }
             }
-            if (moved)
-            {
+            if (moved) {
                 this.parent.emit('moved', { viewport: this.parent, original, type: 'clamp-x' });
             }
         }
-        if (this.options.top !== null || this.options.bottom !== null)
-        {
+        if (this.options.top !== null || this.options.bottom !== null) {
             let moved = false;
 
-            if (!this.noUnderflow && this.parent.screenWorldHeight < this.parent.screenHeight)
-            {
-                switch (this.underflowY)
-                {
+            if (!this.noUnderflow && this.parent.screenWorldHeight < this.parent.screenHeight) {
+                switch (this.underflowY) {
                     case -1:
-                        if (this.parent.y !== 0)
-                        {
+                        if (this.parent.y !== 0) {
                             this.parent.y = 0;
                             moved = true;
                         }
                         break;
                     case 1:
-                        if (this.parent.y !== this.parent.screenHeight - this.parent.screenWorldHeight)
-                        {
+                        if (this.parent.y !== this.parent.screenHeight - this.parent.screenWorldHeight) {
                             this.parent.y = (this.parent.screenHeight - this.parent.screenWorldHeight);
                             moved = true;
                         }
                         break;
                     default:
-                        if (this.parent.y !== (this.parent.screenHeight - this.parent.screenWorldHeight) / 2)
-                        {
+                        if (this.parent.y !== (this.parent.screenHeight - this.parent.screenWorldHeight) / 2) {
                             this.parent.y = (this.parent.screenHeight - this.parent.screenWorldHeight) / 2;
                             moved = true;
                         }
                 }
             }
-            else
-            {
-                if (this.options.top !== null)
-                {
-                    if (this.parent.top < (this.options.top === true ? 0 : this.options.top))
-                    {
+            else {
+                if (this.options.top !== null) {
+                    if (this.parent.top < (this.options.top === true ? 0 : this.options.top as number)) {
                         this.parent.y = -(this.options.top === true ? 0 : this.options.top)
                             * this.parent.scale.y;
                         decelerate.y = 0;
                         moved = true;
                     }
                 }
-                if (this.options.bottom !== null)
-                {
-                    if (this.parent.bottom > (this.options.bottom === true ? this.parent.worldHeight : this.options.bottom))
-                    {
+                if (this.options.bottom !== null) {
+                    if (this.parent.bottom > (this.options.bottom === true ? this.parent.worldHeight : this.options.bottom as number)) {
                         this.parent.y = (-(this.options.bottom === true ? this.parent.worldHeight : this.options.bottom)
                             * this.parent.scale.y) + this.parent.screenHeight;
                         decelerate.y = 0;
@@ -275,8 +240,7 @@ export class Clamp extends Plugin
                     }
                 }
             }
-            if (moved)
-            {
+            if (moved) {
                 this.parent.emit('moved', { viewport: this.parent, original, type: 'clamp-y' });
             }
         }
@@ -286,8 +250,7 @@ export class Clamp extends Plugin
         this.last.scaleY = this.parent.scale.y;
     }
 
-    public reset(): void
-    {
+    public reset(): void {
         this.update();
     }
 }
